@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Books</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="./images/Icon.png">
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111;
+      --muted: #666;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 32px 24px 16px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 0 32px;
+      max-width: 1200px;
+      margin: auto;
+      width: 100%;
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      justify-items: center;
+    }
+
+    .book-card {
+      width: 75%;
+      max-width: 260px;
+      cursor: pointer;
+    }
+
+    @media (min-width: 640px) {
+      .book-grid {
+        grid-template-columns: repeat(2, 1fr);
+        justify-items: stretch;
+        padding: 0 24px;
+      }
+      .book-card {
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .book-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .book-cover {
+      aspect-ratio: 5 / 8;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      box-shadow: 0 10px 24px -12px var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .book-card:hover .book-cover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 30px -14px var(--shadow);
+    }
+
+    .book-title {
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      max-width: 520px;
+      width: 100%;
+      border-radius: 12px;
+      padding: 28px;
+      position: relative;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .modal h2 {
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+    }
+
+    .meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .meta span {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .description {
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* Read Button */
+   .read-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  background: #111;
+  border-radius: 10px;
+  transition: opacity 0.2s ease;
+}
+
+
+    .read-btn:hover {
+      opacity: 0.85;
+    }
+
+    footer {
+      padding: 28px 24px;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+
+    .socials {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      margin-bottom: 12px;
+    }
+
+    .socials a {
+      color: var(--text);
+      font-size: 1.2rem;
+      transition: opacity 0.2s ease;
+    }
+
+    .socials a:hover {
+      opacity: 0.6;
+    }
+
+    footer p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <p>Book's By</p>
+    <img style="width: 100px;" src="./images/A.png" alt="">
+  </header>
+
+  <main>
+    <div class="book-grid" id="bookGrid"></div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-close" onclick="closeModal()">✕</div>
+      <h2 id="modalTitle"></h2>
+      <div class="meta">
+        <span id="modalAuthor"></span>
+        <span id="modalLanguage"></span>
+        <span id="modalPages"></span>
+      </div>
+      <p class="description" id="modalDescription"></p>
+
+      <!-- Read Button -->
+      <a id="modalLink" href="#" target="_blank" class="read-btn">
+        <i class="fas fa-book-open"></i>
+        Read
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="socials">
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-x-twitter"></i></a>
+      <a href="#"><i class="fab fa-linkedin-in"></i></a>
+    </div>
+    <p>© 2026 Ashish Kolhe</p>
+  </footer>
+
+  <script>
+    const books = [
+      {
+        title: "The Clone Event",
+        author: "Ashish Kolhe",
+        language: "English",
+        pages: 202,
+        description: "A bored engineering student accidentally builds a time machine that hates giving up more than he does, and every time he quits, a new version of himself appears. Now five clones deep, one storm away from disaster, he must fix a machine that keeps breaking physics… and his sanity. A chaotic, funny, heartfelt sci-fi mess about ambition, burnout, and the consequences of meeting too many versions of yourself.",
+        cover: "./images/TheCloneEvent.jpg",
+        link: "https://store.pothi.com/book/ashish-kolhe-clone-event/"
+      },
+      {
+        title: "This Wasnt The Story",
+        author: "Ashish Kolhe",
+        language: "English",
+        pages: 0,
+        description: "In Writing Phase...",
+        cover: "./images/ThisWasntTheStory.jpg",
+        link: "#"
+      },
+      {
+        title: "Dream : The Forgotten Prince",
+        author: "Ashish Kolhe",
+        language: "English",
+        pages: 0,
+        description: "In Writing Phase...",
+        cover: "./images/DreamTheForgottenPrince.jpg",
+        link: "#"
+      },
+      {
+        title: "Dream : Revenge Of The Prince",
+        author: "Ashish Kolhe",
+        language: "English",
+        pages: 0,
+        description: "In Writing Phase...",
+        cover: "./images/DreamRevengeOfThePrince.jpg",
+        link: "#"
+      },
+      {
+        title: "Dream : A Stranger In Reality",
+        author: "Ashish Kolhe",
+        language: "English",
+        pages: 0,
+        description: "In Writing Phase...",
+        cover: "./images/DreamAStrangerInReality.jpg",
+        link: "#"
+      }
+    ];
+
+    const grid = document.getElementById("bookGrid");
+
+    books.forEach((book) => {
+      const card = document.createElement("div");
+      card.className = "book-card";
+      card.innerHTML = `
+        <div class="book-cover" style="background-image:url('${book.cover}')"></div>
+        <div class="book-title">${book.title}</div>
+      `;
+      card.onclick = () => openModal(book);
+      grid.appendChild(card);
+    });
+
+    function openModal(book) {
+      document.getElementById("modalTitle").textContent = book.title;
+      document.getElementById("modalAuthor").textContent = "Author: " + book.author;
+      document.getElementById("modalLanguage").textContent = "Language: " + book.language;
+      document.getElementById("modalPages").textContent = "Pages: " + book.pages;
+      document.getElementById("modalDescription").textContent = book.description;
+      document.getElementById("modalLink").href = book.link || "#";
+      document.getElementById("modal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.remove("active");
+    }
+
+    document.getElementById("modal").addEventListener("click", (e) => {
+      if (e.target.id === "modal") closeModal();
+    });
+  </script>
+
+</body>
+</html>
